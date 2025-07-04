@@ -1,4 +1,4 @@
-Comparative Analysis Report: github.py vs github_async.py
+#Comparative Analysis Report: github.py vs github_async.py
 Author: Arda Akgur
 Date: 04.07.2025
 
