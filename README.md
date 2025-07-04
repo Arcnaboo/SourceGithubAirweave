@@ -1,7 +1,7 @@
 # GitHub Source Implementation: Sequential vs Parallel Traversal
 
 **Author**: Arda Akgur  
-**Last Updated**: {DATE}  
+**Last Updated**: 04/07/2025 
 
 ## Overview
 
