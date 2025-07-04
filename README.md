@@ -1,50 +1,44 @@
-#Comparative Analysis Report: github.py vs github_async.py
-Author: Arda Akgur
-Date: 04.07.2025
+# GitHub Source Implementation: Sequential vs Parallel Traversal
 
-1. Purpose
-This document outlines the key differences between the original github.py and optimized github_async.py implementations, focusing on performance improvements while maintaining functional equivalence.
+**Author**: Arda Akgur  
+**Last Updated**: {DATE}  
 
-2. Key Differences
-Aspect	github.py (Original)	github_async.py (Optimized)
-Traversal Strategy	Sequential DFS (Depth-First Search)	Parallel DFS for directories (sequential files)
-Concurrency	Single-threaded async (no parallelism)	Parallel directory processing via asyncio
-Performance	Slower for repositories with many subdirectories	Faster (up to MAX_CONCURRENT_DIRECTORIES=10 parallel requests)
-Code Changes	N/A	Added:
-- import asyncio
-- MAX_CONCURRENT_DIRECTORIES
-- Refactored _traverse_directory
-Error Handling	Unchanged (identical logging/retry logic)	Preserved (no modifications)
-Entity Generation	Unchanged (same entities, breadcrumbs, metadata)	Preserved (identical output structure)
-3. Functional Equivalence
-Both versions:
+## Overview
 
-Produce identical entities (GitHubRepositoryEntity, GitHubDirectoryEntity, GitHubCodeFileEntity).
+This document compares two versions of our GitHub data extraction implementation:
+- `github.py`: Original sequential implementation
+- `github_async.py`: Optimized parallel implementation
 
-Maintain DFS order within individual directories.
+Both versions maintain identical functionality while differing in traversal performance.
 
-Handle errors, rate limits, and pagination identically.
+## Key Differences
 
-Preserve all original features (branch verification, file filtering, etc.).
+| Feature                | `github.py`                     | `github_async.py`               |
+|------------------------|---------------------------------|----------------------------------|
+| **Traversal Approach** | Sequential DFS                 | Parallel DFS (directories only)  |
+| **Concurrency**        | None                           | Up to 10 concurrent directories |
+| **Performance**        | Linear time for directories    | Sub-linear time for directories |
+| **Code Complexity**    | Simpler                       | Added async coordination        |
+| **Error Handling**     | Standard                      | Identical to original           |
+| **Output Consistency** | Fully deterministic           | Deterministic per directory     |
 
-4. Optimization Impact
-Faster Execution: Parallel directory traversal reduces latency for repositories with deep/wide directory structures.
+## Implementation Details
 
-Controlled Concurrency: Semaphore (MAX_CONCURRENT_DIRECTORIES=10) prevents API rate-limiting issues.
+### Original (`github.py`)
+- Processes one directory at a time
+- Simple recursive DFS implementation
+- Easier to debug
+- Better for small repositories
 
-No Behavioral Changes: Output remains deterministic (files processed sequentially; directories in arbitrary but valid order).
+### Optimized (`github_async.py`)
+```python
+MAX_CONCURRENT_DIRECTORIES = 10  # Configurable concurrency limit
 
-5. Recommendation
-Use github_async.py for:
-
-Large repositories (e.g., monorepos with many subdirectories).
-
-Scenarios where latency reduction is critical.
-
-Retain github.py only if:
-
-Strict sequential processing is required (unlikely for most use cases).
-
-Approval:
-Signed,
-Arda Akgur
+async def _traverse_directory(...):
+    # Process files sequentially
+    for file in files:
+        ...
+    
+    # Process directories in parallel
+    async with semaphore:
+        ...
